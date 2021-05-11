@@ -3,6 +3,7 @@ package ysh.com.pdf.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -18,9 +19,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class IouCloseUtils {
 
+    public static void close(PdfDocument document) {
+        if (document != null) {
+            document.close();
+        }
+    }
+
     public static void close(PdfReader reader) {
         if (reader != null) {
             reader.close();
+        }
+    }
+
+    public static void close(com.itextpdf.kernel.pdf.PdfReader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                log.error("itext PdfReader 关闭异常", e);
+            }
         }
     }
 

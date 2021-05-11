@@ -38,7 +38,7 @@ import ysh.com.pdf.util.IouCloseUtils;
 @Slf4j
 public class Itext5PdfUtils {
 
-    public static boolean generatePdfUnableSign(String templatePath, String destPath, Map<String, Object> data) {
+    public static boolean fillPdfUnableSign(String templatePath, String destPath, Map<String, Object> data) {
         PdfReader reader = null;
         try {
             reader = new PdfReader(templatePath);
@@ -87,6 +87,29 @@ public class Itext5PdfUtils {
     }
 
     /**
+     *
+     * @param templateInputStream
+     *            模板文件流
+     * @param data
+     *            填充文件数据
+     * @return 填充后送文件
+     */
+    public static byte[] fillPdfEnableSign(InputStream templateInputStream, Map<String, Object> data) {
+        PdfReader reader = null;
+        try {
+            reader = new PdfReader(templateInputStream);
+            // 填充数据
+            return fillPdfEnableSign(reader, data);
+        } catch (IOException e) {
+            log.error("itext5 PdfReader 获取异常", e);
+        } finally {
+            IouCloseUtils.close(reader);
+        }
+        return null;
+
+    }
+
+    /**
      * 填充pdf文本域内容
      * 
      * 填充后支持继续更新及签名
@@ -98,12 +121,11 @@ public class Itext5PdfUtils {
      *            填充数据
      * @return 填充后字节
      */
-    public static byte[] fillTextEnableSign(PdfReader reader, Map<String, Object> data) {
+    public static byte[] fillPdfEnableSign(PdfReader reader, Map<String, Object> data) {
         ByteArrayOutputStream tempOutput = new ByteArrayOutputStream();
         try {
             // 增量添加，可以继续填充文本域和修改
             PdfStamper pdfStamper = new PdfStamper(reader, tempOutput, '\0', true);
-
             fillText(pdfStamper, data);
             pdfStamper.flush();
             // close必须在tempOutput使用前，否则tempOutput中未写入数据
@@ -145,6 +167,7 @@ public class Itext5PdfUtils {
         PdfReader reader = null;
         PdfStamper stamper = null;
         try {
+            // 根据源文件获取
             reader = new PdfReader(src);
             stamper = PdfStamper.createSignature(reader, dest, '\0', null, true);
             sign(stamper, pk, chain, signFieldName, images, reason, location);
@@ -176,8 +199,8 @@ public class Itext5PdfUtils {
      * @param location
      *            地址
      */
-    private static void sign(PdfStamper stamper, PrivateKey pk, Certificate[] chain, String signFieldName,
-        byte[] images, String reason, String location) throws IOException, DocumentException, GeneralSecurityException {
+    public static void sign(PdfStamper stamper, PrivateKey pk, Certificate[] chain, String signFieldName, byte[] images,
+        String reason, String location) throws IOException, DocumentException, GeneralSecurityException {
         // 获取数字签章属性对象，设定数字签章的属性
         PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
         appearance.setReason(reason);
@@ -192,7 +215,6 @@ public class Itext5PdfUtils {
         appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
         // 设置图章的显示方式，如下选择的是只显示图章（还有其他的模式，可以图章和签名描述一同显示）
         appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC);
-
 
         // 这里的itext提供了2个用于签名的接口，可以自己实现
         // 摘要算法
