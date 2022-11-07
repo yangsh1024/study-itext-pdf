@@ -3,6 +3,8 @@ package ysh.com;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.security.Key;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -12,6 +14,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import cn.hutool.core.io.FileUtil;
+import ysh.com.cert.util.CertUtil;
+import ysh.com.img.util.ImageUtil;
 import ysh.com.pdf.itext7.util.Itext7PdfUtils;
 
 /**
@@ -80,5 +84,25 @@ public class Itext7Test {
         byte[] images = FileUtil.readBytes(imagePath);
         Itext7PdfUtils.sign(new FileInputStream(templatePath), new FileOutputStream(destPath), key, certificate, "sign",
             images, "reason", "location");
+    }
+
+
+    @Test
+    void signNew() throws Exception {
+        String templatePath =
+                "/Users/yangsh/Documents/workspace_my/my-github-study/study-itext-pdf/src/test/resources/dest/sign.pdf";
+        String destPath =
+                "/Users/yangsh/Documents/workspace_my/my-github-study/study-itext-pdf/src/test/resources/dest/sign2.pdf";
+
+        String name = "人名";
+        // 转图片
+        byte[] images = ImageUtil.strToImg(name);
+        // 生成密钥
+        KeyPair keyPair = CertUtil.generateKey();
+        // 生成证书
+        Certificate certificate = CertUtil.generateV3(name, keyPair.getPublic(), keyPair.getPrivate());
+
+        Itext7PdfUtils.sign(new FileInputStream(templatePath), new FileOutputStream(destPath), keyPair.getPrivate(), new Certificate[]{certificate}, "sign",
+                images, "reason", "location");
     }
 }
