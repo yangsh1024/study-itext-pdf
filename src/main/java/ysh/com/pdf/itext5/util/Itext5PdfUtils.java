@@ -98,6 +98,7 @@ public class Itext5PdfUtils {
         PdfReader reader = null;
         try {
             reader = new PdfReader(templateInputStream);
+            reader.setAppendable(true);
             // 填充数据
             return fillPdfEnableSign(reader, data);
         } catch (IOException e) {
@@ -169,6 +170,7 @@ public class Itext5PdfUtils {
         try {
             // 根据源文件获取
             reader = new PdfReader(src);
+            reader.setAppendable(true);
             stamper = PdfStamper.createSignature(reader, dest, '\0', null, true);
             sign(stamper, pk, chain, signFieldName, images, reason, location);
             return true;
@@ -203,6 +205,7 @@ public class Itext5PdfUtils {
         String reason, String location) throws IOException, DocumentException, GeneralSecurityException {
         // 获取数字签章属性对象，设定数字签章的属性
         PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+        appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
         appearance.setReason(reason);
         appearance.setLocation(location);
         // 设置签名的位置，页码，签名域名称，多次追加签名的时候，签名预名称不能一样

@@ -141,7 +141,7 @@ public class Itext7PdfUtils {
         byte[] images, String reason, String location) throws IOException, GeneralSecurityException {
         //
         pdfSigner.setFieldName(signFieldName);
-        pdfSigner.setCertificationLevel(1);
+        pdfSigner.setCertificationLevel(PdfSigner.CERTIFIED_NO_CHANGES_ALLOWED);
         PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
 
         appearance.setReason(reason);
